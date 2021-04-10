@@ -3,11 +3,10 @@
 {% block title %}Welcome{% endblock %}
 
 {% block content %}
-    <h1>Welcome to my page!</h1>
+    <h1>Simple Flask app</h1>
     <p>
-        This is the demo application for the course
-        <em>Getting Started with Flask</em>
-        on <a href="https://www.pluralsight.com">Pluralsight</a>.
+        Simple flash cards app using
+        <em>Flask and Jinja</em>.
     </p>
     <!--<img src="/static/flasklogo.png">-->
     <h2>Flash Cards</h2>
@@ -22,4 +21,8 @@
     </ul>
 
     <a href="{{ url_for('add_card') }}">Add a new card</a>
+    <hr>
+    <form method="post">
+        <button type="submit">Reset cards</button>
+    </form>
 {% endblock %}

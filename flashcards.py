@@ -1,9 +1,11 @@
+import copy
+
 from flask import (Flask, render_template, abort, jsonify, request,
                     redirect, url_for)
 # from model import db, save_db
 
 app = Flask(__name__)
-flashcards_db = [
+seed_db = [
     { "question": "Good morning", "answer": "お早うございます" },
     { "question": "Nice to meet you", "answer": "始めまして" },
     { "question": "Good evening", "answer": "こんにちは" },
@@ -11,10 +13,16 @@ flashcards_db = [
     { "question": "Good night", "answer": "おやすみなさい" },
     { "question": "Welcome", "answer": "いらっしゃいませ" }
 ]
+flashcards_db = copy.deepcopy(seed_db)
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def welcome():
-    return render_template("welcome.html", cards=flashcards_db)
+    if request.method == "POST":
+        global flashcards_db
+        flashcards_db = copy.deepcopy(seed_db)
+        return redirect(url_for("welcome"))
+    else:
+        return render_template("welcome.html", cards=flashcards_db)
 
 
 @app.route("/card/<int:index>")
