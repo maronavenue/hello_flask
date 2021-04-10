@@ -5,7 +5,7 @@ from flask import (Flask, render_template, abort, jsonify, request,
 # from model import db, save_db
 
 app = Flask(__name__)
-seed_db = [
+db = [
     { "question": "Good morning", "answer": "お早うございます" },
     { "question": "Nice to meet you", "answer": "始めまして" },
     { "question": "Good evening", "answer": "こんにちは" },
@@ -13,18 +13,21 @@ seed_db = [
     { "question": "Good night", "answer": "おやすみなさい" },
     { "question": "Welcome", "answer": "いらっしゃいませ" }
 ]
-flashcards_db = copy.deepcopy(seed_db)
 
 @app.route("/")
 def welcome():
-    return render_template("welcome.html", cards=flashcards_db)
+    print(db)
+    print(len(db))
+    return render_template("welcome.html", cards=db)
 
 
 @app.route("/card/<int:index>")
 def card_view(index):
     try:
-        card = flashcards_db[index]
-        return render_template("card.html", card=card, index=index, max_index=len(flashcards_db)-1)
+        print(db)
+        print(len(db))
+        card = db[index]
+        return render_template("card.html", card=card, index=index, max_index=len(db)-1)
     except IndexError:
         abort(404)
 
@@ -36,9 +39,8 @@ def add_card():
             "question": request.form["question"],
             "answer": request.form["answer"]
         }
-        global flashcards_db
-        flashcards_db.append(card)
-        return redirect(url_for("card_view", index=len(flashcards_db)-1))
+        db.append(card)
+        return redirect(url_for("card_view", index=len(db)-1))
     else:
         return render_template("add_card.html")
 
@@ -47,11 +49,12 @@ def add_card():
 def remove_card(index):
     try:
         if request.method == "POST":
-            global flashcards_db
-            flashcards_db.pop(index)
+            db.pop(index)
+            print(db)
+            print(len(db))
             return redirect(url_for("welcome"))
         else:
-            return render_template("remove_card.html", card=flashcards_db[index])
+            return render_template("remove_card.html", card=db[index])
     except IndexError:
         abort(404)
 
@@ -60,12 +63,12 @@ def remove_card(index):
 def api_card_list():
     # List cannot be directly serialized for security reasons
     # The return type must be a string, dict, tuple, Response instance, or WSGI callable, but it was a list.
-    return jsonify(flashcards_db)
+    return jsonify(db)
 
 
 @app.route("/api/card/<int:index>")
 def api_card_detail(index):
     try:
-        return flashcards_db[index]
+        return db[index]
     except IndexError:
         abort(404)
