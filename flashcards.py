@@ -20,9 +20,8 @@ def welcome():
     if request.method == "POST":
         global flashcards_db
         flashcards_db = copy.deepcopy(seed_db)
-        return redirect(url_for("welcome"))
-    else:
-        return render_template("welcome.html", cards=flashcards_db)
+
+    return render_template("welcome.html", cards=flashcards_db)
 
 
 @app.route("/card/<int:index>")
