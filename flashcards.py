@@ -2,17 +2,10 @@ import copy
 
 from flask import (Flask, render_template, abort, jsonify, request,
                     redirect, url_for)
-# from model import db, save_db
+from model import db, save_db
 
 app = Flask(__name__)
-db = [
-    { "question": "Good morning", "answer": "お早うございます" },
-    { "question": "Nice to meet you", "answer": "始めまして" },
-    { "question": "Good evening", "answer": "こんにちは" },
-    { "question": "I am home", "answer": "只今; 唯今" },
-    { "question": "Good night", "answer": "おやすみなさい" },
-    { "question": "Welcome", "answer": "いらっしゃいませ" }
-]
+
 
 @app.route("/")
 def welcome():
