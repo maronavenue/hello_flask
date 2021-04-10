@@ -41,6 +41,7 @@ def add_card():
             "question": request.form["question"],
             "answer": request.form["answer"]
         }
+        global flashcards_db
         flashcards_db.append(card)
         return redirect(url_for("card_view", index=len(flashcards_db)-1))
     else:
@@ -51,6 +52,7 @@ def add_card():
 def remove_card(index):
     try:
         if request.method == "POST":
+            global flashcards_db
             flashcards_db.pop(index)
             return redirect(url_for("welcome"))
         else:
