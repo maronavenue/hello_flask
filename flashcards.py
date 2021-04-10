@@ -15,12 +15,8 @@ seed_db = [
 ]
 flashcards_db = copy.deepcopy(seed_db)
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def welcome():
-    if request.method == "POST":
-        global flashcards_db
-        flashcards_db = copy.deepcopy(seed_db)
-
     return render_template("welcome.html", cards=flashcards_db)
 
 
