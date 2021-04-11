@@ -11,10 +11,10 @@
     <!--<img src="/static/flasklogo.png">-->
     <h2>Flash Cards</h2>
     <ul>
-        {% for card in cards %}
+        {% for id, question, answer in cards %}
             <li>
-                <a href="{{ url_for('card_view', index=loop.index0) }}">
-                    {{ card.question }}
+                <a href="{{ url_for('card_view', id=id) }}">
+                    {{ question }}
                 </a>
             </li>
         {% endfor %}

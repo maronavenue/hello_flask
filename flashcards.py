@@ -1,55 +1,74 @@
 import copy
+import os
 
 from flask import (Flask, render_template, abort, jsonify, request,
-                    redirect, url_for)
-from model import db, save_db
+                    redirect, url_for, current_app, send_from_directory)
+from model import DbStore
 
 app = Flask(__name__)
+with app.app_context():
+    app.config['DB_STORE'] = DbStore()
+dbh = app.config['DB_STORE']
+print("Inside the app!")
 
 
-@app.route("/")
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico')
+
+
+@app.route("/", methods=["GET", "POST"])
 def welcome():
-    print(db)
-    print(len(db))
-    return render_template("welcome.html", cards=db)
+    if request.method == "POST":
+        dbh.reset_db_and_load_seed_data()
+        return redirect(url_for("welcome"))
+    if request.method == "GET":
+        cards = dbh.get_all_cards()
+        return render_template("welcome.html", cards=cards)
 
 
-@app.route("/card/<int:index>")
-def card_view(index):
-    try:
-        print(db)
-        print(len(db))
-        card = db[index]
-        return render_template("card.html", card=card, index=index, max_index=len(db)-1)
-    except IndexError:
+@app.route("/card/<int:id>")
+def card_view(id):
+    cards = dbh.get_all_cards()
+    curr_card = {}
+    curr_index = 0
+    for index, card in enumerate(cards):
+        if id == card[0]:
+            curr_card["id"], curr_card["question"], curr_card["answer"] = card
+            curr_index = index
+            break
+    if not curr_card:
         abort(404)
+    next_index = curr_index + 1 if curr_index != len(cards)-1 else 0
+
+    return render_template("card.html", curr_card=curr_card, next_index=next_index, next_id=cards[next_index][0])
 
 
 @app.route("/add_card/", methods=["GET", "POST"])
 def add_card():
     if request.method == "POST":
-        card = {
-            "question": request.form["question"],
-            "answer": request.form["answer"]
-        }
-        db.append(card)
-        return redirect(url_for("card_view", index=len(db)-1))
+        question = request.form["question"].strip()
+        answer = request.form["answer"].strip()
+        if len(question) > 25:
+            abort(400)
+        if len(answer) > 25:
+            abort(400)
+        new_id = dbh.add_card(question, answer)
+        return redirect(url_for("card_view", id=new_id))
     else:
         return render_template("add_card.html")
 
 
-@app.route("/remove_card/<int:index>", methods=["GET", "POST"])
-def remove_card(index):
-    try:
-        if request.method == "POST":
-            db.pop(index)
-            print(db)
-            print(len(db))
-            return redirect(url_for("welcome"))
-        else:
-            return render_template("remove_card.html", card=db[index])
-    except IndexError:
-        abort(404)
+@app.route("/remove_card/<int:id>", methods=["GET", "POST"])
+def remove_card(id):
+    if request.method == "POST":
+        dbh.remove_card(id)
+        return redirect(url_for("welcome"))
+    else:
+        card = {}
+        _, card["question"], card["answer"] = dbh.get_card_by_id(id)
+        print(card)
+        return render_template("remove_card.html", card=card)
 
 
 @app.route("/api/card/")

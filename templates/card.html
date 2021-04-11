@@ -4,23 +4,23 @@
 
 {% block content %}
     <h1>Flash Card</h1>
-    Question: {{card.question}} <br>
-    Answer:   {{card.answer}}
+    Question: {{curr_card.question}} <br>
+    Answer:   {{curr_card.answer}}
     <p>
         <button>
             <a href="{{ url_for('welcome') }}">Go to Home page</a>
         </button>
         
         <button>
-        {% if index < max_index %}
-            <a href="{{ url_for('card_view', index=index + 1) }}">Next card</a>
+        {% if next_index != 0 %}
+            <a href="{{ url_for('card_view', id=next_id) }}">Next card</a>
         {% else %}
-            <a href="{{ url_for('card_view', index=0) }}">Start over</a>
+            <a href="{{ url_for('card_view', id=next_id) }}">Start over</a>
         {% endif %}
         </button>
 
         <button>
-            <a href="{{ url_for('remove_card', index=index) }}">Delete this card</a>
+            <a href="{{ url_for('remove_card', id=curr_card.id) }}">Delete this card</a>
         </button>
     </p>
 {% endblock %}
