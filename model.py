@@ -21,7 +21,7 @@ class DbStore():
         # conn = psycopg2.connect("user='postgres' password='admin1234' host='localhost' dbname='nihongo_flashcards'")
 
         try:
-            conn_str = os.environ["DSN"]
+            conn_str = os.environ["DATABASE_URL"]
             conn = psycopg2.connect(conn_str)
             print("Successfully connected to the DB: {}".format(conn.get_dsn_parameters()['dbname']))
             return conn
