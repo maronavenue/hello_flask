@@ -1,5 +1,11 @@
 body {
     font-family: sans-serif;
-    color: cornflowerblue;
+    color: maroon;
     background-color: floralwhite;
+}
+
+#logo {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }

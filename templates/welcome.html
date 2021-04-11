@@ -3,12 +3,12 @@
 {% block title %}Welcome{% endblock %}
 
 {% block content %}
-    <h1>Simple Flask app</h1>
+    <img id="logo" src="/static/nihongo.png">
+    <h1>Nihongo flash cards</h1>
     <p>
-        Simple flash cards app using
-        <em>Flask and Jinja</em>.
+        A simple web app to refresh with
+        <em>Flask, Jinja (supposedly ReactJS), Swagger & Postgres (supposedly MongoDB)</em>
     </p>
-    <!--<img src="/static/flasklogo.png">-->
     <h2>Flash Cards</h2>
     <ul>
         {% for id, question, answer in cards %}
@@ -19,9 +19,11 @@
             </li>
         {% endfor %}
     </ul>
-
-    <a href="{{ url_for('add_card') }}">Add a new card</a>
     <hr>
+    <h3>Actions:</h3>
+    <button><a href="{{ url_for('add_card') }}">Add a new card</a></button>
+    <hr>
+    <h3>To seed initial flash cards:</h3>
     <form method="post">
         <button type="submit">Reset cards</button>
     </form>

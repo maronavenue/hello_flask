@@ -12,14 +12,6 @@ class DbStore():
         self._sql_deploy_script = current_app.open_resource("deploy.sql")
 
     def _establish_connection(self):
-        # Method 1 --
-        # conn = psycopg2.connect(host="localhost", port = 5432,
-        #                database="nihongo_flashcards",
-        #                user="postgres", password="admin1234")
-
-        # Method 2 --
-        # conn = psycopg2.connect("user='postgres' password='admin1234' host='localhost' dbname='nihongo_flashcards'")
-
         try:
             conn_str = os.environ["DATABASE_URL"]
             conn = psycopg2.connect(conn_str)
@@ -29,7 +21,7 @@ class DbStore():
             print("Config var must be defined: {}".format(e))
             sys.exit(1)
         except psycopg2.Error as e:
-            print("Could not connect to the DB instance: {}}".format(e))
+            print("Could not connect to the DB instance: {}".format(e))
             sys.exit(1)
 
 
@@ -90,14 +82,3 @@ class DbStore():
                 curs.execute(self._sql_deploy_script.read())
         print("Successfully rebuilt table/s and reloaded seed data")
         return True
-
-#db = DbStore()
-#db.reset_db_and_load_seed_data()
-# foo = db.get_card_by_id(3)
-# print(foo)
-# foo = db.get_total_flashcards()
-# print(foo)
-# db.add_card("Test2", "test2")
-# db.remove_card(22)
-# foo = db.get_all_cards()
-# print(foo)
