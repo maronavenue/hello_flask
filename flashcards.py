@@ -2,8 +2,11 @@ import copy
 import os
 
 from flask import (Flask, render_template, abort, jsonify, request,
-                    redirect, url_for, current_app, send_from_directory)
+                   redirect, url_for, current_app, send_from_directory,
+                   Blueprint)
+from flask_restplus import Api, Resource
 from model import DbStore
+
 
 app = Flask(__name__)
 with app.app_context():
@@ -11,6 +14,12 @@ with app.app_context():
 dbh = app.config['DB_STORE']
 print("Inside the app!")
 
+blueprint = Blueprint("api", __name__, url_prefix="/api")
+api = Api(blueprint, version="0.1.10", title="Nihongo flash cards API",
+          description="A simple Rest API to serve related data")
+app.register_blueprint(blueprint)
+
+ns = api.namespace('flashcards', description="Get flash card data")
 
 @app.route('/favicon.ico')
 def favicon():
@@ -71,16 +80,20 @@ def remove_card(id):
         return render_template("remove_card.html", card=card)
 
 
-@app.route("/api/card/")
-def api_card_list():
+@ns.route("/")
+class Cards(Resource):
     # List cannot be directly serialized for security reasons
     # The return type must be a string, dict, tuple, Response instance, or WSGI callable, but it was a list.
-    return jsonify(db)
+    def get(self):
+        return jsonify(dbh.get_all_cards())
 
 
-@app.route("/api/card/<int:index>")
-def api_card_detail(index):
-    try:
-        return db[index]
-    except IndexError:
-        abort(404)
+@ns.route("/<int:id>")
+class Card(Resource):
+    def get(self, id):
+        card = dbh.get_card_by_id(id)
+        print(card)
+        print(jsonify(card))
+        if not card:
+            abort(404)
+        return jsonify(card)
