@@ -4,14 +4,14 @@ import os
 from flask import (Flask, render_template, abort, jsonify, request,
                    redirect, url_for, current_app, send_from_directory,
                    Blueprint)
-from flask_restplus import Api, Resource
+from flask_restplus import Api, Resource, fields
 from model import DbStore
 
 
 app = Flask(__name__)
+
 with app.app_context():
-    app.config['DB_STORE'] = DbStore()
-dbh = app.config['DB_STORE']
+    dbh = DbStore()
 print("Inside the app!")
 
 blueprint = Blueprint("api", __name__, url_prefix="/api")
@@ -19,7 +19,19 @@ api = Api(blueprint, version="0.1.10", title="Nihongo flash cards API",
           description="A simple Rest API to serve related data")
 app.register_blueprint(blueprint)
 
-ns = api.namespace('flashcards', description="Get flash card data")
+ns = api.namespace('flashcards', description="Operations related to flash cards")
+
+flashcards = api.model('Hello', {
+    "question": fields.String(required=True, description="Write the front size of the card (in your native language)."),
+    "answer": fields.String(required=True, description="Write the corresponding Nihongo translation at the back of this same card.")
+})
+
+# parser = ns.parser()
+# parser.add_argument("flashcard", type=list, required=True, help="Write the front size of the card (in your native language).", location="json")
+# parser.add_argument("answer", type=str, required=True, help="Write the corresponding Nihongo translation at the back of this same card.", location="args")
+
+
+
 
 @app.route('/favicon.ico')
 def favicon():
@@ -82,18 +94,49 @@ def remove_card(id):
 
 @ns.route("/")
 class Cards(Resource):
-    # List cannot be directly serialized for security reasons
-    # The return type must be a string, dict, tuple, Response instance, or WSGI callable, but it was a list.
+
     def get(self):
         return jsonify(dbh.get_all_cards())
 
 
+    @ns.expect(flashcards)
+    def post(self):
+        question = request.json["question"].strip()
+        answer = request.json["answer"].strip()
+        new_id = dbh.add_card(question, answer)
+        new_card = dbh.get_card_by_id(new_id)
+        resp = {}
+        resp["id"], resp["question"], resp["answer"] = new_card
+        return resp
+
+
 @ns.route("/<int:id>")
+@api.response(404, 'Flash card could not found.')
+@api.response(200, 'Success')
 class Card(Resource):
+
     def get(self, id):
         card = dbh.get_card_by_id(id)
-        print(card)
-        print(jsonify(card))
         if not card:
-            abort(404)
-        return jsonify(card)
+            return None, 404
+        resp = {}
+        resp["id"], resp["question"], resp["answer"] = card
+        return resp
+
+
+    def delete(self, id):
+        card = dbh.get_card_by_id(id)
+        if not card:
+            return None, 404
+        dbh.remove_card(id)
+        resp = { "message": "Successfully deleted flash card: {}".format(id) }
+        return resp
+
+
+@ns.route("/reset")
+class CardReset(Resource):
+
+    def post(self):
+        dbh.reset_db_and_load_seed_data()
+        resp = { "message": "Successfully reset data to original state!" }
+        return resp

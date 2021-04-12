@@ -9,7 +9,7 @@ class DbStore():
 
     def __init__(self):
         self._conn = self._establish_connection()
-        self._sql_deploy_script = current_app.open_resource("deploy.sql")
+        self._sql_deploy_script = current_app.open_resource("deploy.sql").read()
 
     def _establish_connection(self):
         try:
@@ -79,6 +79,6 @@ class DbStore():
     def reset_db_and_load_seed_data(self):
         with self._conn as conn:
             with conn.cursor() as curs:
-                curs.execute(self._sql_deploy_script.read())
+                curs.execute(self._sql_deploy_script)
         print("Successfully rebuilt table/s and reloaded seed data")
         return True
